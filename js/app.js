@@ -71,9 +71,6 @@ var hero = {
 //};
 var monsters = [
     { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
-    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
-    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
-    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
 ];
 var monstersCaught = 0;
 var fruitsEaten = 0;
@@ -163,6 +160,7 @@ var reset = function () {
 	// Throw the monster somewhere on the screen randomly
 	for(i in monsters){
 	    var monster = monsters[i];
+	    if (monster != null)
 	    positionRandomly(monster);
 	}
 };
@@ -213,9 +211,8 @@ var update = function (delta) {
 	}
 	if (hero.powerup != undefined){
 	    hero.powerup += 1;
-	    console.log("with powerup=", hero.powerup);
 	}
-	if (hero.powerup > 500){
+	if (hero.powerup > 400){
 	    hero.powerup = undefined;
 	}
 
@@ -234,9 +231,9 @@ var update = function (delta) {
 	        monster.direction = getRandomDirection();
 	    }
 	    if (caught_monster(hero, monster)){
-		console.log("powerup=" + hero.powerup);
 		if (hero.powerup){
 		    monsters[i] = null;
+		    monstersCaught += 1;
 		} else {
 		    if (hero.lives > 0){
 			hero.lives--;
@@ -247,23 +244,25 @@ var update = function (delta) {
 		}
 	    }
 	}
-
-
-	// Are they touching?
-	//if (is_tree(hero.x + 15, hero.y + 15)){
-	//    console.log('CAVALGANDO ARVORE');
-	//}
+	if (monstersCaught == monsters.length){
+	    game_over = true;
+	}
 };
 
 // Draw everything
 var render = function () {
     if (game_over){
-	// Score
-	ctx.fillStyle = "rgb(250, 50, 50)";
+	var color = "rgb(250, 50, 50)";
+	var msg = "GAME OVER";
+	if (monstersCaught == monsters.length){
+	    color = "rgb(50, 250, 50)";
+	    msg = "YOU WIN!";
+	}
+	ctx.fillStyle = color;
 	ctx.font = "46px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
-	ctx.fillText("GAME OVER", 150, 200);
+	ctx.fillText(msg, 100, 200);
     } else {
 	if (bgReady) {
 		ctx.drawImage(bgImage, 0, 0);
@@ -297,10 +296,10 @@ var render = function () {
 
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
-	ctx.font = "12px Helvetica";
+	ctx.font = "bold 16px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
-	ctx.fillText("Lives: " + hero.lives, 32, 32);
+	ctx.fillText("Lives: " + hero.lives, 20, 30);
     }
 };
 
