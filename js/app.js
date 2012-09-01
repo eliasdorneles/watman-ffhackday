@@ -5,7 +5,7 @@ requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimati
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = 512;
+canvas.width = 510;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
@@ -33,7 +33,7 @@ monsterImage.onload = function () {
 };
 monsterImage.src = "img/monster.png";
 
-// Hero image
+// Tree image
 var treeReady = false;
 var treeImage = new Image();
 treeImage.onload = function () {
@@ -41,6 +41,13 @@ treeImage.onload = function () {
 };
 treeImage.src = "img/tree.png";
 
+// Fruit image
+var fruitReady = false;
+var fruitImage = new Image();
+fruitImage.onload = function () {
+	fruitReady = true;
+};
+fruitImage.src = "img/fruit.png";
 
 var getRandomDirection = function(){
     var directions = ["up", "down", "left", "right"];
@@ -49,7 +56,8 @@ var getRandomDirection = function(){
 // Game objects
 var hero = {
 	speed: 180, // movement in pixels per second
-	direction: "stopped"
+	direction: "stopped",
+	lives: 3
 };
 //var monster = {
 //    speed: 100,
@@ -62,9 +70,12 @@ var monsters = [
     { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
 ];
 var monstersCaught = 0;
+var fruitsEaten = 0;
 
 
-var TREE = 1
+var game_over = false;
+var TREE = 1;
+var FRUIT = 2;
 var labirint_width = 17;
 var labirint_height = 16;
 var labirint = null; // labirint unitialized
@@ -95,6 +106,19 @@ var is_tree = function(x, y){
 	   labirint[parseInt(Math.floor(y + 25) / 30)][parseInt(Math.floor(x + 25) / 30)] == TREE ||
 	   labirint[parseInt(Math.floor(y) / 30)     ][parseInt(Math.floor(x + 25) / 30)] == TREE;
 }
+var really_eat_fruit = function(i, j){
+    if (labirint[i][j] == FRUIT){
+	labirint[i][j] = 0;
+	return true;
+    }
+    return false;
+}
+var eat_fruit = function(x, y){
+    return really_eat_fruit(parseInt(Math.floor(y) / 30)     , parseInt(Math.floor(x) / 30)) ||
+	   really_eat_fruit(parseInt(Math.floor(y + 25) / 30), parseInt(Math.floor(x) / 30)     ) ||
+	   really_eat_fruit(parseInt(Math.floor(y + 25) / 30), parseInt(Math.floor(x + 25) / 30)) ||
+	   really_eat_fruit(parseInt(Math.floor(y) / 30)     , parseInt(Math.floor(x + 25) / 30));
+}
 
 var positionRandomly = function(guy){
     guy.x = 32 + (Math.random() * (canvas.width - 64));
@@ -112,13 +136,13 @@ var reset = function () {
 	hero.y = canvas.height / 2;
 
 	labirint = [
-	    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	    [0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0],
+	    [2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 2],
+	    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+	    [0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0],
 	    [0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0],
-	    [0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-	    [0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-	    [0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0],
-	    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	    [0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0],
+	    [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+	    [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0],
 	    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 	    [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0],
 	    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -127,7 +151,7 @@ var reset = function () {
 	    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
 	    [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
 	    [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-	    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	    [2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2],
 	    ]
 
 	// Throw the monster somewhere on the screen randomly
@@ -182,6 +206,11 @@ var update = function (delta) {
 	    move(hero, delta);
 	}
 
+	if (eat_fruit(hero.x, hero.y)){
+	    hero.powerup = true;
+	    ++fruitsEaten;
+	}
+
 	for (i in monsters){
 	    var monster = monsters[i];
 	    monster.prev_x = monster.x;
@@ -191,8 +220,12 @@ var update = function (delta) {
 	        monster.direction = getRandomDirection();
 	    }
 	    if (caught_monster(hero, monster)){
-		++monstersCaught;
-		reset();
+		if (hero.lives > 0){
+		    hero.lives--;
+		    reset();
+		} else {
+		    game_over = true;
+		}
 	    }
 	}
 
@@ -205,22 +238,35 @@ var update = function (delta) {
 
 // Draw everything
 var render = function () {
+    if (game_over){
+	// Score
+	ctx.fillStyle = "rgb(250, 50, 50)";
+	ctx.font = "46px Helvetica";
+	ctx.textAlign = "left";
+	ctx.textBaseline = "top";
+	ctx.fillText("GAME OVER", 150, 200);
+    } else {
 	if (bgReady) {
 		ctx.drawImage(bgImage, 0, 0);
 	}
 
 	// mostrar labirinto
-	//ctx.drawImage(treeImage, 0, 30);
 	for(var i = 0; i < labirint.length; i++){
 	    for(var j = 0; j < labirint[i].length; j++){
 		if (labirint[i][j] == TREE){
 		    ctx.drawImage(treeImage, j * 30, i * 30);
+		} else if (labirint[i][j] == FRUIT){
+		    ctx.drawImage(fruitImage, j * 30, i * 30);
 		}
 	    }
 	}
 
 	if (heroReady) {
+	    if (hero.powerup){
+		ctx.globalCompositeOperation = "lighter";
+	    }
 		ctx.drawImage(heroImage, hero.x, hero.y);
+		ctx.globalAlpha = 1.0;
 	}
 
 	if (monsterReady) {
@@ -231,11 +277,12 @@ var render = function () {
 	}
 
 	// Score
-	//ctx.fillStyle = "rgb(250, 250, 250)";
-	//ctx.font = "24px Helvetica";
-	//ctx.textAlign = "left";
-	//ctx.textBaseline = "top";
-	//ctx.fillText("Goblins caught: " + monstersCaught, 32, 32);
+	ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.font = "12px Helvetica";
+	ctx.textAlign = "left";
+	ctx.textBaseline = "top";
+	ctx.fillText("Lives: " + hero.lives, 32, 32);
+    }
 };
 
 // The main game loop
