@@ -71,6 +71,10 @@ var hero = {
 //};
 var monsters = [
     { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
+    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
+    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
+    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
+    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
 ];
 var monstersCaught = 0;
 var fruitsEaten = 0;
