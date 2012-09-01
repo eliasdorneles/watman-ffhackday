@@ -1,18 +1,14 @@
-{
-  "name": "Simple Canvas Game",
-  "description": "A simple HTML5 2D canvas game.",
-  "version": "0.1",
-  "manifest_version": 2,
-  "app": {
-    "urls": [
-      "*://localhost/examples/simple_canvas_game/"
-    ],
-    "launch": {
-      "container": "panel",
-      "web_url": "http://localhost:8086/examples/simple_canvas_game/"
-    }
-  },
-  "icons": {
-    "128": "/icon_128.png"
-  }
-}
+{  
+  "version": "0.1",  
+  "name": "WatMan Game",  
+  "description": "A simple extension to HTML5.",
+  "launch_path": "/watman-ffhackday/",
+  "icons": {  
+    "128": "/watman-ffhackday/icon_128.png"  
+  },  
+  "developer": {  
+    "name": "Elias Dorneles",  
+    "url": "http://eliasdorneles.github.com/watman-ffhackday"  
+  },  
+  "installs_allowed_from": ["*"]
+}  
