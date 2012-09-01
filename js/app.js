@@ -24,6 +24,12 @@ heroImage.onload = function () {
 	heroReady = true;
 };
 heroImage.src = "img/hero.png";
+var hero2Ready = false;
+var hero2Image = new Image();
+hero2Image.onload = function () {
+	hero2Ready = true;
+};
+hero2Image.src = "img/hero2.png";
 
 // Monster image
 var monsterReady = false;
@@ -205,14 +211,22 @@ var update = function (delta) {
 	if (hero.direction != "stopped"){
 	    move(hero, delta);
 	}
+	if (hero.powerup != undefined){
+	    hero.powerup += 1;
+	    console.log("with powerup=", hero.powerup);
+	}
+	if (hero.powerup > 500){
+	    hero.powerup = undefined;
+	}
 
 	if (eat_fruit(hero.x, hero.y)){
-	    hero.powerup = true;
+	    hero.powerup = 1;
 	    ++fruitsEaten;
 	}
 
 	for (i in monsters){
 	    var monster = monsters[i];
+	    if (monster == null) continue;
 	    monster.prev_x = monster.x;
 	    monster.prev_y = monster.y;
 	    move(monster, delta);
@@ -220,11 +234,16 @@ var update = function (delta) {
 	        monster.direction = getRandomDirection();
 	    }
 	    if (caught_monster(hero, monster)){
-		if (hero.lives > 0){
-		    hero.lives--;
-		    reset();
+		console.log("powerup=" + hero.powerup);
+		if (hero.powerup){
+		    monsters[i] = null;
 		} else {
-		    game_over = true;
+		    if (hero.lives > 0){
+			hero.lives--;
+			reset();
+		    } else {
+			game_over = true;
+		    }
 		}
 	    }
 	}
@@ -261,17 +280,17 @@ var render = function () {
 	    }
 	}
 
-	if (heroReady) {
-	    if (hero.powerup){
-		ctx.globalCompositeOperation = "lighter";
-	    }
+	if (heroReady && hero.powerup == undefined) {
 		ctx.drawImage(heroImage, hero.x, hero.y);
-		ctx.globalAlpha = 1.0;
+	}
+	if (hero2Ready && hero.powerup != undefined) {
+		ctx.drawImage(hero2Image, hero.x, hero.y);
 	}
 
 	if (monsterReady) {
 	    for (i in monsters){
 		var monster = monsters[i];
+		if (monster != null)
 		ctx.drawImage(monsterImage, monster.x, monster.y);
 	    }
 	}
