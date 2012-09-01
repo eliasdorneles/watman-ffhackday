@@ -1,14 +1,14 @@
 {  
   "version": "0.1",  
-  "name": "Simple Canvas Game",  
-  "description": "A simple HTML5 2D canvas game.",
-  "launch_path": "/WebGameStub/",
+  "name": "WatMan Game",  
+  "description": "A simple extension to HTML5.",
+  "launch_path": "/watman-ffhackday/",
   "icons": {  
-    "128": "/WebGameStub/icon_128.png"  
+    "128": "/watman-ffhackday/icon_128.png"  
   },  
   "developer": {  
-    "name": "Matt Hackett",  
-    "url": "http://www.lostdecadegames.com"  
+    "name": "Elias Dorneles",  
+    "url": "http://eliasdorneles.github.com/watman-ffhackday"  
   },  
   "installs_allowed_from": ["*"]
 }  
