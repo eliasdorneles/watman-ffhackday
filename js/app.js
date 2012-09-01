@@ -51,10 +51,16 @@ var hero = {
 	speed: 180, // movement in pixels per second
 	direction: "stopped"
 };
-var monster = {
-    speed: 100,
-    direction: getRandomDirection()
-};
+//var monster = {
+//    speed: 100,
+//    direction: getRandomDirection()
+//};
+var monsters = [
+    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
+    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
+    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
+    { speed: 100, direction: getRandomDirection(), prev_x: 0, prev_y: 0 },
+];
 var monstersCaught = 0;
 
 
@@ -125,7 +131,10 @@ var reset = function () {
 	    ];
 
 	// Throw the monster somewhere on the screen randomly
-	positionRandomly(monster);
+	for(i in monsters){
+	    var monster = monsters[i];
+	    positionRandomly(monster);
+	}
 };
 
 var move = function(guy, delta){
@@ -147,6 +156,13 @@ var move = function(guy, delta){
     if(guy.y > 450) guy.y = 450;
 }
 
+var caught_monster = function(hero, monster){
+    return hero.x <= (monster.x + 32)
+	&& monster.x <= (hero.x + 32)
+	&& hero.y <= (monster.y + 32)
+	&& monster.y <= (hero.y + 32);
+}
+
 
 // Update game objects
 var update = function (delta) {
@@ -166,11 +182,18 @@ var update = function (delta) {
 	    move(hero, delta);
 	}
 
-	prev_x = monster.x;
-	prev_y = monster.y;
-	move(monster, delta);
-	if (monster.x == prev_x && monster.y == prev_y){
-	    monster.direction = getRandomDirection();
+	for (i in monsters){
+	    var monster = monsters[i];
+	    monster.prev_x = monster.x;
+	    monster.prev_y = monster.y;
+	    move(monster, delta);
+	    if (monster.x == monster.prev_x && monster.y == monster.prev_y){
+	        monster.direction = getRandomDirection();
+	    }
+	    if (caught_monster(hero, monster)){
+		++monstersCaught;
+		reset();
+	    }
 	}
 
 
@@ -178,15 +201,6 @@ var update = function (delta) {
 	//if (is_tree(hero.x + 15, hero.y + 15)){
 	//    console.log('CAVALGANDO ARVORE');
 	//}
-	if (
-		hero.x <= (monster.x + 32)
-		&& monster.x <= (hero.x + 32)
-		&& hero.y <= (monster.y + 32)
-		&& monster.y <= (hero.y + 32)
-	) {
-		++monstersCaught;
-		reset();
-	}
 };
 
 // Draw everything
@@ -210,15 +224,18 @@ var render = function () {
 	}
 
 	if (monsterReady) {
+	    for (i in monsters){
+		var monster = monsters[i];
 		ctx.drawImage(monsterImage, monster.x, monster.y);
+	    }
 	}
 
 	// Score
-	ctx.fillStyle = "rgb(250, 250, 250)";
-	ctx.font = "24px Helvetica";
-	ctx.textAlign = "left";
-	ctx.textBaseline = "top";
-	ctx.fillText("Goblins caught: " + monstersCaught, 32, 32);
+	//ctx.fillStyle = "rgb(250, 250, 250)";
+	//ctx.font = "24px Helvetica";
+	//ctx.textAlign = "left";
+	//ctx.textBaseline = "top";
+	//ctx.fillText("Goblins caught: " + monstersCaught, 32, 32);
 };
 
 // The main game loop
